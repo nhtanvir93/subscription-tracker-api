@@ -9,6 +9,7 @@ import subscriptionRouter from "./routes/subscription.routes";
 import userRouter from "./routes/user.routes";
 import arcjetMiddleware from "./middlewares/arcjet.middleware";
 import authorize from "./middlewares/auth.middleware";
+import workflowRouter from "./routes/workflow.routes";
 
 const app: Express = express();
 
@@ -25,6 +26,7 @@ const apiRouter = Router();
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/users", authorize, userRouter);
 apiRouter.use("/subscriptions", authorize, subscriptionRouter);
+apiRouter.use("/workflows", workflowRouter);
 
 app.use("/api/v1", apiRouter);
 

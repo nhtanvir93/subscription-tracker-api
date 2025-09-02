@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import Subscription from "../models/subscription.model";
 import { CustomError } from "../middlewares/error.middleware";
+import workflowClient from "../config/uptash";
+import { SERVER_URL } from "../config/env";
 
 export const getSubscriptions = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -30,7 +32,19 @@ export const getSubscription = async (req: Request, res: Response, next: NextFun
 export const createSubscription = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const subscription = await Subscription.create({ ...req.body, user: req.user?._id });
-        res.status(200).json({ success: true, data: subscription });
+
+        const { workflowRunId } = await workflowClient.trigger({
+            url: `${SERVER_URL}/api/v1/workflows/subscription/reminder`,
+            body: {
+                subscriptionId: subscription._id
+            },
+            headers: {
+                "Content-Type": "application/json"
+            },
+            retries: 0
+        });
+
+        res.status(200).json({ success: true, data: { subscription, workflowRunId } });
     } catch (error) {
         next(error);
     }
